@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.selfie.tracker" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>每日自拍</name>
+    <description>
+        一款记录每日容貌变化的自拍打卡应用
+    </description>
+    <author email="dev@example.com" href="http://example.com">
+        Selfie Tracker Team
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <icon density="ldpi" src="res/icon/android/icon-36-ldpi.png" />
+        <icon density="mdpi" src="res/icon/android/icon-48-mdpi.png" />
+        <icon density="hdpi" src="res/icon/android/icon-72-hdpi.png" />
+        <icon density="xhdpi" src="res/icon/android/icon-96-xhdpi.png" />
+        <icon density="xxhdpi" src="res/icon/android/icon-144-xxhdpi.png" />
+        <icon density="xxxhdpi" src="res/icon/android/icon-192-xxxhdpi.png" />
+        <splash density="land-ldpi" src="res/screen/android/screen-ldpi-land.png" />
+        <splash density="land-mdpi" src="res/screen/android/screen-mdpi-land.png" />
+        <splash density="land-hdpi" src="res/screen/android/screen-hdpi-land.png" />
+        <splash density="land-xhdpi" src="res/screen/android/screen-xhdpi-land.png" />
+        <splash density="port-ldpi" src="res/screen/android/screen-ldpi-port.png" />
+        <splash density="port-mdpi" src="res/screen/android/screen-mdpi-port.png" />
+        <splash density="port-hdpi" src="res/screen/android/screen-hdpi-port.png" />
+        <splash density="port-xhdpi" src="res/screen/android/screen-xhdpi-port.png" />
+        <splash density="port-xxhdpi" src="res/screen/android/screen-xxhdpi-port.png" />
+        <splash density="port-xxxhdpi" src="res/screen/android/screen-xxxhdpi-port.png" />
+        <preference name="android-minSdkVersion" value="22" />
+        <preference name="android-targetSdkVersion" value="33" />
+        <preference name="android-compileSdkVersion" value="33" />
+        <preference name="android-buildToolsVersion" value="33.0.0" />
+        <preference name="orientation" value="default" />
+        <preference name="Fullscreen" value="false" />
+        <preference name="KeepRunning" value="true" />
+        <preference name="SplashScreenDelay" value="3000" />
+        <preference name="AutoHideSplashScreen" value="true" />
+        <preference name="FadeSplashScreen" value="true" />
+        <preference name="FadeSplashScreenDuration" value="500" />
+        <preference name="ShowSplashScreenSpinner" value="false" />
+        <preference name="android:theme" value="@android:style/Theme.DeviceDefault.NoActionBar" />
+        <preference name="android:windowSoftInputMode" value="adjustResize" />
+        <preference name="android:exported" value="true" />
+        <uses-permission android:name="android.permission.CAMERA" />
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.RECORD_AUDIO" />
+        <uses-permission android:name="android.permission.VIBRATE" />
+        <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+        <uses-feature android:name="android.hardware.camera" android:required="true" />
+        <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+        <icon height="57" src="res/icon/ios/icon-57.png" width="57" />
+        <icon height="114" src="res/icon/ios/icon-57-2x.png" width="114" />
+        <icon height="72" src="res/icon/ios/icon-72.png" width="72" />
+        <icon height="144" src="res/icon/ios/icon-72-2x.png" width="144" />
+        <icon height="60" src="res/icon/ios/icon-60.png" width="60" />
+        <icon height="120" src="res/icon/ios/icon-60-2x.png" width="120" />
+        <icon height="180" src="res/icon/ios/icon-60-3x.png" width="180" />
+        <icon height="76" src="res/icon/ios/icon-76.png" width="76" />
+        <icon height="152" src="res/icon/ios/icon-76-2x.png" width="152" />
+        <icon height="29" src="res/icon/ios/icon-small.png" width="29" />
+        <icon height="58" src="res/icon/ios/icon-small-2x.png" width="58" />
+        <icon height="87" src="res/icon/ios/icon-small-3x.png" width="87" />
+        <icon height="167" src="res/icon/ios/icon-83.5@2x.png" width="167" />
+        <splash height="480" src="res/screen/ios/Default~iphone.png" width="320" />
+        <splash height="960" src="res/screen/ios/Default@2x~iphone.png" width="640" />
+        <splash height="1024" src="res/screen/ios/Default-Portrait~ipad.png" width="768" />
+        <splash height="2048" src="res/screen/ios/Default-Portrait@2x~ipad.png" width="1536" />
+        <splash height="1136" src="res/screen/ios/Default-568h@2x~iphone.png" width="640" />
+        <splash height="1334" src="res/screen/ios/Default-667h.png" width="750" />
+        <splash height="2208" src="res/screen/ios/Default-736h.png" width="1242" />
+        <splash height="2436" src="res/screen/ios/Default-812h.png" width="1125" />
+        <splash height="2688" src="res/screen/ios/Default-896h.png" width="1242" />
+        <splash height="1792" src="res/screen/ios/Default-1792h.png" width="828" />
+        <config-file parent="NSCameraUsageDescription" platform="ios" target="*-Info.plist">
+            <string>此应用需要访问您的相机来拍摄每日自拍</string>
+        </config-file>
+        <config-file parent="NSPhotoLibraryUsageDescription" platform="ios" target="*-Info.plist">
+            <string>此应用需要访问您的照片库来导入和保存自拍照片</string>
+        </config-file>
+        <config-file parent="NSPhotoLibraryAddUsageDescription" platform="ios" target="*-Info.plist">
+            <string>此应用需要保存照片到您的照片库</string>
+        </config-file>
+        <config-file parent="NSMicrophoneUsageDescription" platform="ios" target="*-Info.plist">
+            <string>此应用需要访问麦克风来录制视频</string>
+        </config-file>
+        <preference name="orientation" value="default" />
+        <preference name="Fullscreen" value="false" />
+        <preference name="AutoHideSplashScreen" value="true" />
+        <preference name="SplashScreenDelay" value="3000" />
+        <preference name="FadeSplashScreen" value="true" />
+        <preference name="FadeSplashScreenDuration" value="500" />
+        <preference name="ShowSplashScreenSpinner" value="false" />
+        <preference name="BackupWebStorage" value="cloud" />
+    </platform>
+    <plugin name="cordova-plugin-camera" spec="^7.0.0">
+        <variable name="CAMERA_USAGE_DESCRIPTION" value="此应用需要访问您的相机来拍摄每日自拍" />
+        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="此应用需要访问您的照片库来导入和保存自拍照片" />
+        <variable name="PHOTOLIBRARY_ADD_USAGE_DESCRIPTION" value="此应用需要保存照片到您的照片库" />
+    </plugin>
+    <plugin name="cordova-plugin-file" spec="^7.0.0">
+        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="此应用需要访问您的文件系统来存储自拍照片" />
+    </plugin>
+    <plugin name="cordova-plugin-media-capture" spec="^4.0.0">
+        <variable name="CAMERA_USAGE_DESCRIPTION" value="此应用需要访问您的相机来录制视频" />
+        <variable name="MICROPHONE_USAGE_DESCRIPTION" value="此应用需要访问麦克风来录制视频" />
+        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="此应用需要访问您的照片库来保存录制的视频" />
+    </plugin>
+    <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.3">
+        <variable name="ANDROID_SUPPORT_V4_VERSION" value="28.0.0" />
+    </plugin>
+    <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
+    <plugin name="cordova-plugin-ios-camera-permissions" spec="^1.2.0">
+        <variable name="CAMERA_USAGE_DESCRIPTION" value="此应用需要访问您的相机来拍摄每日自拍" />
+    </plugin>
+    <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
+    <plugin name="cordova-plugin-statusbar" spec="^3.0.0" />
+    <plugin name="cordova-plugin-whitelist" spec="^1.3.5" />
+    <plugin name="cordova-plugin-device" spec="^2.1.0" />
+    <plugin name="cordova-plugin-app-version" spec="^0.1.16" />
+    <plugin name="cordova-plugin-file-opener2" spec="^4.0.0" />
+    <plugin name="cordova-plugin-secure-storage" spec="^3.0.2" />
+    <plugin name="cordova-plugin-biometric-auth" spec="^3.0.1">
+        <variable name="FACEID_USAGE_DESCRIPTION" value="此应用需要使用Face ID来解锁应用" />
+    </plugin>
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="BackgroundColor" value="0xffffffff" />
+    <preference name="HideKeyboardFormAccessoryBar" value="false" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="true" />
+    <preference name="MediaPlaybackRequiresUserAction" value="false" />
+    <preference name="AllowInlineMediaPlayback" value="false" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="TopActivityIndicator" value="white" />
+    <preference name="UseSwiftLanguageVersion" value="5" />
+    <preference name="AndroidXEnabled" value="true" />
+    <preference name="GradlePluginKotlinEnabled" value="true" />
+    <preference name="GradlePluginKotlinCodeStyle" value="official" />
+    <preference name="GradlePluginKotlinVersion" value="1.7.10" />
+</widget>
