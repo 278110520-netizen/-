@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全签到 - 下载应用</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #1E88E5 0%, #42A5F5 100%);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .qrcode-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .download-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .download-btn:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        .download-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img class="h-10 w-auto" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="安全签到">
+                        <span class="ml-2 text-xl font-bold text-primary">安全签到</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="#features" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary">功能介绍</a>
+                    <a href="#download" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary">立即下载</a>
+                    <a href="#faq" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary">常见问题</a>
+                    <a href="#contact" class="ml-4 px-4 py-2 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary-dark">联系我们</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <div class="hero-gradient pt-24 pb-16 sm:pt-32 sm:pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
+                    安全签到，守护您的每一天
+                </h1>
+                <p class="mt-6 text-xl text-blue-100 max-w-3xl mx-auto">
+                    专为老年人和需要监护的特殊人群设计，通过视频签到机制确保用户安全，未按时签到自动通知紧急联系人。
+                </p>
+                <div class="mt-10">
+                    <a href="#download" class="download-btn inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-white hover:bg-gray-100 shadow-lg">
+                        <i class="fa fa-download mr-2"></i>
+                        立即下载
+                    </a>
+                    <a href="#features" class="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-700 hover:bg-blue-800 shadow-lg">
+                        了解更多
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手机预览 -->
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
+        <div class="bg-white rounded-xl shadow-2xl p-6 text-center">
+            <img class="max-w-md mx-auto" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="安全签到应用截图">
+            <p class="mt-4 text-gray-600">安全签到应用界面预览</p>
+        </div>
+    </div>
+
+    <!-- 功能介绍 -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    核心功能
+                </h2>
+                <p class="mt-4 text-lg text-gray-500">
+                    安全签到应用提供全方位的安全保障功能，让您和家人都能安心
+                </p>
+            </div>
+
+            <div class="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- 功能卡片 1 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-secondary">
+                    <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-video-camera text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">视频签到</h3>
+                    <p class="text-gray-600">
+                        通过简短的视频录制确认用户状态，确保是本人操作，提高安全性。支持语音辅助，方便老年人使用。
+                    </p>
+                </div>
+
+                <!-- 功能卡片 2 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-warning">
+                    <div class="w-14 h-14 rounded-full bg-yellow-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-bell text-warning text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">定时提醒</h3>
+                    <p class="text-gray-600">
+                        可自定义每日签到时间，系统会在签到时间前发送提醒通知，避免遗忘。支持语音和视觉双重提醒。
+                    </p>
+                </div>
+
+                <!-- 功能卡片 3 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-danger">
+                    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-phone text-danger text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">紧急求助</h3>
+                    <p class="text-gray-600">
+                        一键触发紧急求助，自动通知所有紧急联系人，并提供实时位置信息，确保及时救援。
+                    </p>
+                </div>
+
+                <!-- 功能卡片 4 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-primary">
+                    <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-map-marker text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">定位服务</h3>
+                    <p class="text-gray-600">
+                        自动获取并记录签到位置，在紧急情况下提供准确的位置信息，帮助救援人员快速找到用户。
+                    </p>
+                </div>
+
+                <!-- 功能卡片 5 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-purple-500">
+                    <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-comments text-purple-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">语音辅助</h3>
+                    <p class="text-gray-600">
+                        内置语音引导功能，为视力不佳的用户提供操作指导，支持中文和英文两种语言。
+                    </p>
+                </div>
+
+                <!-- 功能卡片 6 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-8 border-t-4 border-teal-500">
+                    <div class="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mb-6">
+                        <i class="fa fa-history text-teal-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">历史记录</h3>
+                    <p class="text-gray-600">
+                        详细记录每次签到的时间、位置和状态，支持查看历史记录，便于家人了解用户的日常规律。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="download" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <!-- 左侧：下载说明 -->
+                    <div class="p-8 md:p-12 flex flex-col justify-center">
+                        <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
+                            立即下载安全签到应用
+                        </h2>
+                        <p class="text-lg text-gray-600 mb-8">
+                            扫描二维码或点击链接，将安全签到应用添加到您的手机主屏幕，随时使用。
+                        </p>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                                        <i class="fa fa-check text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-medium text-gray-900">简单安装</h3>
+                                    <p class="mt-1 text-gray-600">只需几步，即可完成安装</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                                        <i class="fa fa-check text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-medium text-gray-900">无需应用商店</h3>
+                                    <p class="mt-1 text-gray-600">直接安装，无需等待审核</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                                        <i class="fa fa-check text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-medium text-gray-900">自动更新</h3>
+                                    <p class="mt-1 text-gray-600">始终使用最新版本</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-10">
+                            <a href="#" class="download-btn inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark">
+                                <i class="fa fa-download mr-2"></i>
+                                直接下载
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：二维码 -->
+                    <div class="bg-gray-50 p-8 md:p-12 flex items-center justify-center">
+                        <div class="qrcode-container text-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://safe-checkin-pwa.example.com" alt="安全签到应用下载二维码" class="w-64 h-64 mx-auto">
+                            <p class="mt-6 text-lg font-medium text-gray-900">扫描二维码安装</p>
+                            <p class="mt-2 text-gray-600">支持 iOS 和 Android 设备</p>
+                            
+                            <div class="mt-8 flex justify-center space-x-6">
+                                <div class="flex items-center">
+                                    <i class="fa fa-apple text-3xl text-gray-800"></i>
+                                    <span class="ml-2 text-gray-700">iOS</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fa fa-android text-3xl text-gray-800"></i>
+                                    <span class="ml-2 text-gray-700">Android</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 安装步骤 -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    安装步骤
+                </h2>
+                <p class="mt-4 text-lg text-gray-500">
+                    按照以下步骤，轻松安装安全签到应用
+                </p>
+            </div>
+
+            <div class="mt-16 relative">
+                <!-- 连接线 -->
+                <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-200"></div>
+
+                <div class="space-y-12">
+                    <!-- 步骤 1 -->
+                    <div class="relative">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 md:pr-8 md:text-right">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">第一步：扫描二维码</h3>
+                                <p class="text-gray-600">
+                                    使用手机上的Safari（iOS）或Chrome（Android）浏览器扫描上方的二维码。
+                                </p>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-white text-xl font-bold">1</div>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:w-5/12 md:pl-8">
+                                <img class="rounded-lg shadow-lg w-full h-48 object-cover" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://safe-checkin-pwa.example.com" alt="扫描二维码">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤 2 -->
+                    <div class="relative">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 md:pr-8 md:text-right md:order-1 order-2">
+                                <img class="rounded-lg shadow-lg w-full h-48 object-cover" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="添加到主屏幕">
+                            </div>
+                            <div class="mt-4 md:mt-0 md:flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-white text-xl font-bold">2</div>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:w-5/12 md:pl-8 md:order-2 order-1">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">第二步：添加到主屏幕</h3>
+                                <p class="text-gray-600">
+                                    iOS：点击底部的"分享"按钮，然后选择"添加到主屏幕"。<br>
+                                    Android：点击顶部的"安装"按钮，或从菜单中选择"添加到主屏幕"。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤 3 -->
+                    <div class="relative">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 md:pr-8 md:text-right">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">第三步：完成安装</h3>
+                                <p class="text-gray-600">
+                                    确认应用名称，点击"添加"或"安装"按钮，应用将出现在您的主屏幕上。
+                                </p>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-white text-xl font-bold">3</div>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:w-5/12 md:pl-8">
+                                <img class="rounded-lg shadow-lg w-full h-48 object-cover" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="完成安装">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤 4 -->
+                    <div class="relative">
+                        <div class="md:flex items-center justify-between">
+                            <div class="md:w-5/12 md:pr-8 md:text-right md:order-1 order-2">
+                                <img class="rounded-lg shadow-lg w-full h-48 object-cover" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="开始使用">
+                            </div>
+                            <div class="mt-4 md:mt-0 md:flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-white text-xl font-bold">4</div>
+                            </div>
+                            <div class="mt-4 md:mt-0 md:w-5/12 md:pl-8 md:order-2 order-1">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">第四步：开始使用</h3>
+                                <p class="text-gray-600">
+                                    点击主屏幕上的应用图标，打开安全签到应用，完成首次设置并开始使用。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常见问题 -->
+    <section id="faq" class="py-20 bg-gray-50">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    常见问题
+                </h2>
+                <p class="mt-4 text-lg text-gray-500">
+                    解答您可能遇到的问题
+                </p>
+            </div>
+
+            <div class="mt-12 space-y-8">
+                <!-- 问题 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">应用支持哪些设备？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            安全签到应用支持iOS 12.2及以上版本的iPhone和iPad，以及Android 6.0及以上版本的手机和平板设备。需要使用Safari（iOS）或Chrome（Android）浏览器安装。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 问题 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">应用需要付费吗？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            安全签到应用完全免费使用，没有任何隐藏费用或内购项目。我们致力于为老年人和需要监护的特殊人群提供安全保障服务。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 问题 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">视频和位置数据如何保护？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            我们非常重视用户隐私。视频和位置数据主要存储在本地设备上，不会上传到服务器。在紧急情况下，这些数据会加密发送给您指定的紧急联系人。您可以随时在设置中查看和管理所有数据。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 问题 4 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">如何更新应用？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            作为PWA应用，安全签到会在您每次打开时自动检查更新。当有新版本时，应用会在后台自动更新，您无需手动操作。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 问题 5 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">如果忘记签到会发生什么？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            如果在设定的签到时间后未完成签到，系统会先发送提醒通知。如果在设定的宽限期（默认为10分钟）内仍未签到，系统将自动通知您设置的紧急联系人，并提供最后一次记录的位置信息。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 问题 6 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">如何设置紧急联系人？</h3>
+                        <svg class="h-6 w-6 text-gray-500 transform faq-icon transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-4 hidden">
+                        <p class="text-gray-600">
+                            打开应用后，点击底部导航栏的"设置"按钮，然后选择"紧急联系人"选项。您可以添加多个紧急联系人，包括姓名、电话号码和关系。请确保输入的电话号码正确无误。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    联系我们
+                </h2>
+                <p class="mt-4 text-lg text-gray-500">
+                    如果您有任何问题或建议，请随时联系我们
+                </p>
+            </div>
+
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 联系方式 1 -->
+                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                    <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-envelope text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">电子邮件</h3>
+                    <a href="mailto:support@safecheckin.com" class="text-primary hover:text-primary-dark">
+                        support@safecheckin.com
+                    </a>
+                </div>
+
+                <!-- 联系方式 2 -->
+                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                    <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-phone text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">客服电话</h3>
+                    <a href="tel:4001234567" class="text-primary hover:text-primary-dark">
+                        400-123-4567
+                    </a>
+                    <p class="mt-2 text-gray-600 text-sm">周一至周日 9:00-18:00</p>
+                </div>
+
+                <!-- 联系方式 3 -->
+                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                    <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-comments text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">在线客服</h3>
+                    <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark">
+                        <i class="fa fa-headphones mr-2"></i>
+                        立即咨询
+                    </button>
+                    <p class="mt-2 text-gray-600 text-sm">工作日 9:00-18:00</p>
+                </div>
+            </div>
+
+            <!-- 反馈表单 -->
+            <div class="mt-16 max-w-3xl mx-auto">
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">发送反馈</h3>
+                    <form>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                                <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">电子邮件</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">主题</label>
+                            <input type="text" id="subject" name="subject" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-6">
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">消息</label>
+                            <textarea id="message" name="message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark">
+                                <i class="fa fa-paper-plane mr-2"></i>
+                                发送消息
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- 公司信息 -->
+                <div>
+                    <div class="flex items-center">
+                        <img class="h-10 w-auto" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d3114771699d4387ad00b903bde728a6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260225125433373D6ACEBAE493971E4D&rrcfp=f06b921b&x-expires=1774587321&x-signature=OI2z3V0VK7O0yTdDlDNO7MmhSlQ%3D" alt="安全签到">
+                        <span class="ml-2 text-xl font-bold">安全签到</span>
+                    </div>
+                    <p class="mt-4 text-gray-400">
+                        守护您的每一天，让爱不缺席。
+                    </p>
+                    <div class="mt-6 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fa fa-qq text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 快速链接 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white">功能介绍</a></li>
+                        <li><a href="#download" class="text-gray-400 hover:text-white">立即下载</a></li>
+                        <li><a href="#faq" class="text-gray-400 hover:text-white">常见问题</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white">联系我们</a></li>
+                    </ul>
+                </div>
+
+                <!-- 资源 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">资源</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">使用教程</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">用户手册</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">隐私政策</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">服务条款</a></li>
+                    </ul>
+                </div>
+
+                <!-- 订阅 -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">订阅更新</h3>
+                    <p class="text-gray-400 mb-4">
+                        订阅我们的通讯，获取最新更新和资讯。
+                    </p>
+                    <form>
+                        <div class="flex">
+                            <input type="email" placeholder="您的电子邮件" class="px-4 py-2 w-full rounded-l-md focus:outline-none text-gray-900">
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded-r-md hover:bg-primary-dark">
+                                <i class="fa fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2023 安全签到. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // FAQ 切换
+        document.querySelectorAll('.faq-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('.faq-icon');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const headerOffset = 80;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 检测是否可以安装PWA
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 阻止Chrome 67及更早版本自动显示安装提示
+            e.preventDefault();
+            // 保存事件以便稍后触发
+            deferredPrompt = e;
+            
+            // 显示自定义安装提示
+            showInstallNotification();
+        });
+
+        // 显示安装通知
+        function showInstallNotification() {
+            const installNotification = document.createElement('div');
+            installNotification.className = 'fixed bottom-4 left-4 right-4 bg-white p-4 rounded-lg shadow-lg z-50 flex items-center justify-between';
+            installNotification.innerHTML = `
+                <div>
+                    <h3 class="font-bold">安装安全签到应用</h3>
+                    <p class="text-sm text-gray-600">将应用添加到主屏幕，随时使用</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="install-later" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">稍后</button>
+                    <button id="install-now" class="px-3 py-1 bg-primary text-white rounded-lg text-sm">安装</button>
+                </div>
+            `;
+            
+            document.body.appendChild(installNotification);
+            
+            document.getElementById('install-now').addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('用户已安装PWA');
+                        } else {
+                            console.log('用户拒绝安装PWA');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+                document.body.removeChild(installNotification);
+            });
+            
+            document.getElementById('install-later').addEventListener('click', () => {
+                document.body.removeChild(installNotification);
+            });
+        }
+    </script>
+</body>
+</html>
