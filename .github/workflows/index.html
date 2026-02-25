@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日自拍 - 记录你的每一天</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#EC4899',
+                        accent: '#8B5CF6',
+                        neutral: '#F3F4F6',
+                        'neutral-dark': '#9CA3AF',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.25);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #3B82F6 0%, #EC4899 100%);
+            }
+            .gradient-text {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                background-image: linear-gradient(135deg, #3B82F6 0%, #EC4899 100%);
+            }
+            .camera-shutter {
+                animation: shutter 0.5s ease-in-out;
+            }
+            @keyframes shutter {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.2); opacity: 0.8; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .progress-ring-circle {
+                transition: stroke-dashoffset 0.35s;
+                transform: rotate(-90deg);
+                transform-origin: 50% 50%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 应用容器 -->
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- 顶部导航栏 -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/421e2a7723c142cd8999cf689368677f~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621064&x-signature=cdy%2BgzNHe7GgYZfpnKOgOTmAKZo%3D" alt="每日自拍" class="h-10 w-10 mr-2">
+                    <h1 class="text-xl font-bold gradient-text">每日自拍</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="notificationBtn" class="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <i class="fa fa-bell-o text-gray-600"></i>
+                        <span id="notificationBadge" class="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center hidden">1</span>
+                    </button>
+                    <button id="settingsBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <i class="fa fa-cog text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="flex-1 container mx-auto px-4 py-6">
+            <!-- 页面内容 - 根据当前活动页面显示不同内容 -->
+            <div id="pageContent">
+                <!-- 相机页面 (默认显示) -->
+                <div id="cameraPage" class="animate-fade-in">
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-2xl font-bold text-gray-800">今日自拍</h2>
+                            <span id="currentDate" class="text-gray-500"></span>
+                        </div>
+                        <p id="dailyMotivation" class="text-gray-600 italic"></p>
+                    </div>
+
+                    <!-- 相机预览区域 -->
+                    <div class="relative bg-black rounded-2xl overflow-hidden aspect-square mb-6 shadow-lg">
+                        <video id="cameraPreview" class="w-full h-full object-cover" autoplay playsinline></video>
+                        <canvas id="canvas" class="hidden w-full h-full"></canvas>
+                        <img id="capturedImage" class="hidden w-full h-full object-cover" alt="自拍预览">
+                        
+                        <!-- 参考线/同比例框 (默认隐藏) -->
+                        <div id="referenceOverlay" class="hidden absolute inset-0 border-4 border-white/30 rounded-full flex items-center justify-center">
+                            <div class="w-3/4 h-3/4 border-2 border-white/20 rounded-full"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-full h-px bg-white/20"></div>
+                                <div class="h-full w-px bg-white/20"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 相机控制按钮 -->
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
+                            <div class="flex justify-center items-center space-x-8">
+                                <button id="switchCameraBtn" class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fa fa-refresh text-xl"></i>
+                                </button>
+                                <button id="captureBtn" class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-gray-800 hover:bg-gray-100 transition-colors shadow-lg">
+                                    <i class="fa fa-camera text-2xl"></i>
+                                </button>
+                                <button id="galleryBtn" class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                                    <i class="fa fa-image text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 拍照后的编辑选项 (默认隐藏) -->
+                        <div id="editOptions" class="hidden absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
+                            <div class="flex space-x-4 mb-8">
+                                <button id="retakeBtn" class="px-6 py-3 bg-white/20 text-white rounded-full hover:bg-white/30 transition-colors">
+                                    <i class="fa fa-refresh mr-2"></i>重拍
+                                </button>
+                                <button id="saveBtn" class="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors">
+                                    <i class="fa fa-check mr-2"></i>保存
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 相机顶部控制栏 -->
+                        <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/70 to-transparent flex justify-between items-center">
+                            <button id="referenceBtn" class="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors">
+                                <i class="fa fa-th text-lg"></i>
+                            </button>
+                            <div class="flex space-x-2">
+                                <button id="beautyBtn" class="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors">
+                                    <i class="fa fa-magic text-lg"></i>
+                                </button>
+                                <button id="flashBtn" class="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors">
+                                    <i class="fa fa-bolt text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 拍摄辅助工具栏 -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">拍摄辅助</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <button id="referenceLineBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <i class="fa fa-th mr-2 text-gray-600"></i>
+                                <span>参考线</span>
+                            </button>
+                            <button id="compareFrameBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <i class="fa fa-clone mr-2 text-gray-600"></i>
+                                <span>同比例框</span>
+                            </button>
+                            <button id="importFromGalleryBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <i class="fa fa-upload mr-2 text-gray-600"></i>
+                                <span>相册导入</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 打卡进度 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">连续打卡</h3>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="w-16 h-16" viewBox="0 0 36 36">
+                                    <circle cx="18" cy="18" r="16" fill="none" stroke="#E5E7EB" stroke-width="3"></circle>
+                                    <circle id="progressCircle" class="progress-ring-circle" cx="18" cy="18" r="16" fill="none" stroke="#3B82F6" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="25"></circle>
+                                </svg>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-500">当前连续天数</p>
+                                    <p id="streakCount" class="text-2xl font-bold text-gray-800">7天</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">总打卡天数</p>
+                                <p id="totalCount" class="text-2xl font-bold text-gray-800">23天</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 今日提示 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-pink-50 rounded-xl p-6 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="bg-primary/10 p-3 rounded-full mr-4">
+                                <i class="fa fa-lightbulb-o text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">今日拍摄建议</h3>
+                                <p id="dailyTip" class="text-gray-600">尝试在自然光源下拍摄，光线从侧面照射可以更好地展现面部轮廓。保持放松的表情，拍出最自然的自己！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 时间线页面 (默认隐藏) -->
+                <div id="timelinePage" class="hidden animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">历史记录</h2>
+                        <p class="text-gray-600">查看你的自拍时间线，见证每一步的变化</p>
+                    </div>
+
+                    <!-- 时间筛选器 -->
+                    <div class="flex overflow-x-auto pb-2 mb-6 space-x-2">
+                        <button class="time-filter-btn px-4 py-2 rounded-full bg-primary text-white whitespace-nowrap">全部</button>
+                        <button class="time-filter-btn px-4 py-2 rounded-full bg-white text-gray-700 whitespace-nowrap">今天</button>
+                        <button class="time-filter-btn px-4 py-2 rounded-full bg-white text-gray-700 whitespace-nowrap">本周</button>
+                        <button class="time-filter-btn px-4 py-2 rounded-full bg-white text-gray-700 whitespace-nowrap">本月</button>
+                        <button class="time-filter-btn px-4 py-2 rounded-full bg-white text-gray-700 whitespace-nowrap">今年</button>
+                    </div>
+
+                    <!-- 日历视图 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <button id="prevMonthBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                                <i class="fa fa-chevron-left text-gray-600"></i>
+                            </button>
+                            <h3 id="currentMonth" class="text-lg font-semibold text-gray-800">2025年7月</h3>
+                            <button id="nextMonthBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                                <i class="fa fa-chevron-right text-gray-600"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- 日历网格 -->
+                        <div class="grid grid-cols-7 gap-2 mb-2">
+                            <div class="text-center text-gray-500 text-sm py-2">日</div>
+                            <div class="text-center text-gray-500 text-sm py-2">一</div>
+                            <div class="text-center text-gray-500 text-sm py-2">二</div>
+                            <div class="text-center text-gray-500 text-sm py-2">三</div>
+                            <div class="text-center text-gray-500 text-sm py-2">四</div>
+                            <div class="text-center text-gray-500 text-sm py-2">五</div>
+                            <div class="text-center text-gray-500 text-sm py-2">六</div>
+                        </div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-2">
+                            <!-- 日历单元格将通过JS动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 照片网格 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">照片墙</h3>
+                        <div id="photosGrid" class="grid grid-cols-3 gap-3">
+                            <!-- 照片将通过JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 对比页面 (默认隐藏) -->
+                <div id="comparePage" class="hidden animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">照片对比</h2>
+                        <p class="text-gray-600">选择不同日期的照片进行对比，观察变化</p>
+                    </div>
+
+                    <!-- 照片选择区域 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">选择照片</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div id="comparePhoto1" class="aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                                <i class="fa fa-plus text-gray-400 text-3xl mb-2"></i>
+                                <p class="text-gray-500 text-sm">选择第一张照片</p>
+                            </div>
+                            <div id="comparePhoto2" class="aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                                <i class="fa fa-plus text-gray-400 text-3xl mb-2"></i>
+                                <p class="text-gray-500 text-sm">选择第二张照片</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <button id="clearCompareBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                <i class="fa fa-refresh mr-2"></i>清空选择
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 对比工具 -->
+                    <div id="compareTools" class="bg-white rounded-xl p-6 shadow-sm mb-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">对比工具</h3>
+                        <div class="flex flex-wrap justify-center gap-3 mb-6">
+                            <button id="sideBySideBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fa fa-columns mr-2"></i>左右分屏
+                            </button>
+                            <button id="topBottomBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fa fa-window-maximize mr-2"></i>上下分屏
+                            </button>
+                            <button id="sliderBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fa fa-arrows-h mr-2"></i>滑动擦除
+                            </button>
+                            <button id="overlayBtn" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fa fa-clone mr-2"></i>叠加对比
+                            </button>
+                        </div>
+                        
+                        <!-- 透明度滑块 (叠加模式下显示) -->
+                        <div id="opacitySliderContainer" class="hidden mb-6">
+                            <label for="opacitySlider" class="block text-sm font-medium text-gray-700 mb-2">调整透明度</label>
+                            <input type="range" id="opacitySlider" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>第一张</span>
+                                <span>50%</span>
+                                <span>第二张</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 对比结果 -->
+                        <div id="compareResult" class="relative aspect-square bg-gray-900 rounded-lg overflow-hidden">
+                            <!-- 左右分屏 -->
+                            <div id="sideBySideView" class="flex h-full">
+                                <div id="sideBySide1" class="w-1/2 h-full bg-gray-800"></div>
+                                <div class="w-px h-full bg-white/20"></div>
+                                <div id="sideBySide2" class="w-1/2 h-full bg-gray-800"></div>
+                            </div>
+                            
+                            <!-- 上下分屏 -->
+                            <div id="topBottomView" class="hidden flex flex-col h-full">
+                                <div id="topBottom1" class="h-1/2 w-full bg-gray-800"></div>
+                                <div class="h-px w-full bg-white/20"></div>
+                                <div id="topBottom2" class="h-1/2 w-full bg-gray-800"></div>
+                            </div>
+                            
+                            <!-- 滑动擦除 -->
+                            <div id="sliderView" class="hidden relative h-full">
+                                <div id="sliderBottom" class="absolute inset-0"></div>
+                                <div id="sliderTop" class="absolute inset-0 overflow-hidden">
+                                    <div id="sliderTopImage" class="absolute inset-0"></div>
+                                </div>
+                                <div id="sliderHandle" class="absolute top-0 bottom-0 w-1 bg-white/50 left-1/2 transform -translate-x-1/2 flex items-center justify-center cursor-ew-resize">
+                                    <div class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                                        <i class="fa fa-arrows-h text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 叠加对比 -->
+                            <div id="overlayView" class="hidden h-full">
+                                <div id="overlayBottom" class="absolute inset-0"></div>
+                                <div id="overlayTop" class="absolute inset-0 opacity-50"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 标记工具 -->
+                        <div class="mt-4">
+                            <h4 class="text-md font-semibold text-gray-800 mb-3">标记工具</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="addNoteBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i class="fa fa-sticky-note mr-2 text-gray-600"></i>
+                                    <span>添加备注</span>
+                                </button>
+                                <button id="drawOnImageBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i class="fa fa-pencil mr-2 text-gray-600"></i>
+                                    <span>标记细节</span>
+                                </button>
+                                <button id="saveComparisonBtn" class="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i class="fa fa-save mr-2 text-gray-600"></i>
+                                    <span>保存对比</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 智能分析 (亮点功能) -->
+                    <div id="aiAnalysis" class="bg-white rounded-xl p-6 shadow-sm hidden">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-accent/10 p-2 rounded-full mr-3">
+                                <i class="fa fa-magic text-accent"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">智能变化分析</h3>
+                        </div>
+                        
+                        <div class="animate-pulse mb-4">
+                            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                        
+                        <button id="generateAnalysisBtn" class="w-full py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
+                            <i class="fa fa-line-chart mr-2"></i>生成分析报告
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 洞察页面 (默认隐藏) -->
+                <div id="insightsPage" class="hidden animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">容貌洞察</h2>
+                        <p class="text-gray-600">了解你的容貌变化趋势和特点</p>
+                    </div>
+
+                    <!-- 时间范围选择 -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">分析时间范围</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="time-range-btn px-4 py-2 bg-primary text-white rounded-lg">最近30天</button>
+                            <button class="time-range-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">最近90天</button>
+                            <button class="time-range-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">最近6个月</button>
+                            <button class="time-range-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">全部时间</button>
+                        </div>
+                    </div>
+
+                    <!-- 变化趋势图 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">容貌变化趋势</h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm">
+                                    <i class="fa fa-download mr-1"></i>保存
+                                </button>
+                                <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm">
+                                    <i class="fa fa-share-alt mr-1"></i>分享
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="insightsChart" height="200"></canvas>
+                    </div>
+
+                    <!-- 容貌特点分析 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">容貌特点分析</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-2">
+                                        <i class="fa fa-smile-o text-blue-600"></i>
+                                    </div>
+                                    <h4 class="font-medium text-gray-800">表情特点</h4>
+                                </div>
+                                <p class="text-sm text-gray-600">你的笑容在最近30天更加自然，嘴角上扬的角度增加了约15%。</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="bg-green-100 p-2 rounded-full mr-2">
+                                        <i class="fa fa-leaf text-green-600"></i>
+                                    </div>
+                                    <h4 class="font-medium text-gray-800">皮肤状态</h4>
+                                </div>
+                                <p class="text-sm text-gray-600">皮肤亮度提升明显，特别是在脸颊区域，可能与护肤习惯有关。</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="bg-purple-100 p-2 rounded-full mr-2">
+                                        <i class="fa fa-sun-o text-purple-600"></i>
+                                    </div>
+                                    <h4 class="font-medium text-gray-800">光线偏好</h4>
+                                </div>
+                                <p class="text-sm text-gray-600">数据分析显示，你在自然光下的自拍效果最佳，尤其是上午10点左右。</p>
+                            </div>
+                            <div class="bg-yellow-50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="bg-yellow-100 p-2 rounded-full mr-2">
+                                        <i class="fa fa-camera text-yellow-600"></i>
+                                    </div>
+                                    <h4 class="font-medium text-gray-800">拍摄角度</h4>
+                                </div>
+                                <p class="text-sm text-gray-600">你偏好45°俯拍角度，这个角度能更好地展现面部轮廓。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 变化视频生成 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">变化视频</h3>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">新功能</span>
+                        </div>
+                        <div class="aspect-video bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fa fa-film text-gray-400 text-4xl mb-2"></i>
+                                <p class="text-gray-500">生成你的容貌变化视频</p>
+                            </div>
+                        </div>
+                        <button id="generateVideoBtn" class="w-full py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
+                            <i class="fa fa-magic mr-2"></i>生成变化视频
+                        </button>
+                    </div>
+
+                    <!-- 个性化建议 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 shadow-sm">
+                        <div class="flex items-start">
+                            <div class="bg-accent/10 p-3 rounded-full mr-4">
+                                <i class="fa fa-lightbulb-o text-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">个性化建议</h3>
+                                <ul class="space-y-2 text-gray-600">
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                        <span>尝试在不同光线条件下拍摄，丰富你的自拍多样性</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                        <span>考虑每周固定一天在同一时间、同一地点拍摄，便于观察长期变化</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                        <span>保持当前的护肤习惯，皮肤状态呈现积极趋势</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 个人中心页面 (默认隐藏) -->
+                <div id="profilePage" class="hidden animate-fade-in">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">个人中心</h2>
+                        <p class="text-gray-600">查看你的统计数据和设置</p>
+                    </div>
+
+                    <!-- 用户信息卡片 -->
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 shadow-lg mb-6 text-white">
+                        <div class="flex items-center">
+                            <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-3xl font-bold mr-4">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 id="userName" class="text-xl font-bold mb-1">用户</h3>
+                                <p id="joinDate" class="text-white/80">加入于 2025年1月1日</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 统计数据 -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-sm text-gray-500 mb-1">总打卡天数</p>
+                            <p class="text-2xl font-bold text-gray-800">23</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-sm text-gray-500 mb-1">最长连续天数</p>
+                            <p class="text-2xl font-bold text-gray-800">7</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-sm text-gray-500 mb-1">完成率</p>
+                            <p class="text-2xl font-bold text-gray-800">76%</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <p class="text-sm text-gray-500 mb-1">最近打卡</p>
+                            <p class="text-2xl font-bold text-gray-800">今天</p>
+                        </div>
+                    </div>
+
+                    <!-- 活动图表 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">打卡活动</h3>
+                        <canvas id="activityChart" height="200"></canvas>
+                    </div>
+
+                    <!-- 设置选项 -->
+                    <div class="bg-white rounded-xl shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 p-4 border-b border-gray-100">提醒设置</h3>
+                        <div class="divide-y divide-gray-100">
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-bell text-blue-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">每日提醒</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="reminderToggle" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-clock-o text-blue-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">提醒时间</span>
+                                </div>
+                                <div class="ml-11">
+                                    <input type="time" id="reminderTime" value="20:00" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-calendar-check-o text-blue-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">提醒频率</span>
+                                </div>
+                                <div class="ml-11 grid grid-cols-3 gap-2">
+                                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer bg-primary text-white">
+                                        <input type="radio" name="reminderFrequency" value="daily" class="mr-2" checked>
+                                        <span>每天</span>
+                                    </label>
+                                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="reminderFrequency" value="weekdays" class="mr-2">
+                                        <span>工作日</span>
+                                    </label>
+                                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="reminderFrequency" value="custom" class="mr-2">
+                                        <span>自定义</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-refresh text-blue-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">漏打卡提醒</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="missedReminderToggle" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 p-4 border-b border-gray-100">隐私与安全</h3>
+                        <div class="divide-y divide-gray-100">
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-lock text-green-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">应用锁</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="appLockToggle" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-key text-green-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">解锁方式</span>
+                                </div>
+                                <div class="ml-11 grid grid-cols-2 gap-3">
+                                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer bg-primary text-white">
+                                        <input type="radio" name="unlockMethod" value="fingerprint" class="mr-2" checked>
+                                        <span>指纹</span>
+                                    </label>
+                                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="unlockMethod" value="password" class="mr-2">
+                                        <span>密码</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-eye-slash text-green-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">隐藏日期</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="hideDateToggle" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-purple-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-cloud-upload text-purple-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">自动备份</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="backupToggle" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 p-4 border-b border-gray-100">数据管理</h3>
+                        <div class="divide-y divide-gray-100">
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-download text-yellow-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">导出数据</span>
+                                </div>
+                                <button id="exportDataBtn" class="px-3 py-1 bg-yellow-100 text-yellow-600 rounded hover:bg-yellow-200 transition-colors">
+                                    导出
+                                </button>
+                            </div>
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="bg-red-100 p-2 rounded-full mr-3">
+                                        <i class="fa fa-trash text-red-600"></i>
+                                    </div>
+                                    <span class="text-gray-800">清除数据</span>
+                                </div>
+                                <button id="clearDataBtn" class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
+                                    清除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部导航栏 -->
+        <nav class="bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.1)] sticky bottom-0 z-50">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-around py-3">
+                    <button class="nav-btn flex flex-col items-center w-1/5 text-primary" data-page="cameraPage">
+                        <i class="fa fa-camera text-xl mb-1"></i>
+                        <span class="text-xs">相机</span>
+                    </button>
+                    <button class="nav-btn flex flex-col items-center w-1/5 text-gray-500" data-page="timelinePage">
+                        <i class="fa fa-calendar text-xl mb-1"></i>
+                        <span class="text-xs">时间线</span>
+                    </button>
+                    <button class="nav-btn flex flex-col items-center w-1/5 text-gray-500" data-page="comparePage">
+                        <i class="fa fa-clone text-xl mb-1"></i>
+                        <span class="text-xs">对比</span>
+                    </button>
+                    <button class="nav-btn flex flex-col items-center w-1/5 text-gray-500" data-page="insightsPage">
+                        <i class="fa fa-bar-chart text-xl mb-1"></i>
+                        <span class="text-xs">洞察</span>
+                    </button>
+                    <button class="nav-btn flex flex-col items-center w-1/5 text-gray-500" data-page="profilePage">
+                        <i class="fa fa-user-o text-xl mb-1"></i>
+                        <span class="text-xs">我的</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 通知弹窗 -->
+    <div id="notificationModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl w-11/12 max-w-md max-h-[80vh] overflow-y-auto animate-slide-up">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-lg font-semibold text-gray-800">通知</h3>
+                <button id="closeNotificationBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="space-y-4">
+                    <div class="flex items-start p-3 bg-blue-50 rounded-lg">
+                        <div class="bg-blue-100 p-2 rounded-full mr-3 flex-shrink-0">
+                            <i class="fa fa-bell text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">今日打卡提醒</p>
+                            <p class="text-xs text-gray-500 mt-1">别忘了今天的自拍打卡哦！已连续打卡7天</p>
+                            <p class="text-xs text-gray-400 mt-1">10分钟前</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 rounded-lg">
+                        <div class="bg-green-100 p-2 rounded-full mr-3 flex-shrink-0">
+                            <i class="fa fa-check text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">打卡成功</p>
+                            <p class="text-xs text-gray-500 mt-1">恭喜！你已完成今日打卡，继续保持！</p>
+                            <p class="text-xs text-gray-400 mt-1">昨天 20:30</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 rounded-lg">
+                        <div class="bg-purple-100 p-2 rounded-full mr-3 flex-shrink-0">
+                            <i class="fa fa-star text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">新成就解锁</p>
+                            <p class="text-xs text-gray-500 mt-1">你已解锁"坚持一周"成就，继续加油！</p>
+                            <p class="text-xs text-gray-400 mt-1">3天前</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 照片选择弹窗 -->
+    <div id="photoSelectModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl w-11/12 max-w-md max-h-[80vh] overflow-y-auto animate-slide-up">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-lg font-semibold text-gray-800">选择照片</h3>
+                <button id="closePhotoSelectBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div id="selectablePhotos" class="grid grid-cols-3 gap-3">
+                    <!-- 可选照片将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 清除数据确认弹窗 -->
+    <div id="clearDataModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl w-11/12 max-w-md animate-slide-up">
+            <div class="p-6">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fa fa-exclamation-triangle text-red-500 text-2xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-800 mb-2">确认清除数据？</h3>
+                <p class="text-gray-600 text-center mb-6">此操作将清除所有照片和记录，且无法恢复。</p>
+                <div class="flex space-x-3">
+                    <button id="cancelClearDataBtn" class="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        取消
+                    </button>
+                    <button id="confirmClearDataBtn" class="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                        确认清除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智能分析结果弹窗 -->
+    <div id="analysisResultModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl w-11/12 max-w-md max-h-[80vh] overflow-y-auto animate-slide-up">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <div class="flex items-center">
+                    <div class="bg-accent/10 p-2 rounded-full mr-2">
+                        <i class="fa fa-magic text-accent"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">智能分析结果</h3>
+                </div>
+                <button id="closeAnalysisBtn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <h4 class="text-md font-semibold text-gray-800 mb-2">时间跨度</h4>
+                    <p class="text-gray-600">2025年1月15日 - 2025年7月21日 (188天)</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-md font-semibold text-gray-800 mb-2">主要变化</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>发型变化明显，从短发逐渐留长</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>面部轮廓更加清晰，可能与体重变化有关</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>表情更加自信，笑容更加自然</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-md font-semibold text-gray-800 mb-2">季节性变化</h4>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-600">春季</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">色彩明亮</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-600">夏季</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">阳光充足</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-600">秋季</span>
+                            <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">温暖色调</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">冬季</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">室内拍摄</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-md font-semibold text-gray-800 mb-2">变化趋势图</h4>
+                    <canvas id="changeTrendChart" height="150"></canvas>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                    <h4 class="text-md font-semibold text-blue-800 mb-2">AI 建议</h4>
+                    <p class="text-blue-700">你在过去半年中展现出积极的变化趋势。建议继续保持规律的自拍记录，可以尝试更多样化的拍摄角度和表情，记录更多生活场景，让你的时间线更加丰富多样。</p>
+                </div>
+                
+                <button id="saveAnalysisBtn" class="w-full py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
+                    <i class="fa fa-download mr-2"></i>保存分析报告
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        const mockPhotos = [
+            { id: 1, date: '2025-07-21', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D', position: 'top-left' },
+            { id: 2, date: '2025-07-20', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D', position: 'top-right' },
+            { id: 3, date: '2025-07-19', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D', position: 'bottom-left' },
+            { id: 4, date: '2025-07-18', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D', position: 'bottom-right' },
+            { id: 5, date: '2025-07-15', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/20d3bca99faa432c849eddf3936e0737~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621033&x-signature=jQZJC44PDWfiEfHKCcuM19KiKGU%3D', position: 'top-left' },
+            { id: 6, date: '2025-07-10', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/20d3bca99faa432c849eddf3936e0737~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621033&x-signature=jQZJC44PDWfiEfHKCcuM19KiKGU%3D', position: 'top-right' },
+            { id: 7, date: '2025-07-05', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/20d3bca99faa432c849eddf3936e0737~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621033&x-signature=jQZJC44PDWfiEfHKCcuM19KiKGU%3D', position: 'bottom-left' },
+            { id: 8, date: '2025-07-01', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/20d3bca99faa432c849eddf3936e0737~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621033&x-signature=jQZJC44PDWfiEfHKCcuM19KiKGU%3D', position: 'bottom-right' },
+            { id: 9, date: '2025-06-25', src: 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D', position: 'top-left' },
+        ];
+
+        // 每日激励语
+        const dailyMotivations = [
+            "今天的你比昨天更美好！",
+            "每一张自拍都是时间的见证。",
+            "记录当下，珍藏回忆。",
+            "你的笑容是最好的自拍滤镜。",
+            "每一天都值得被记录。",
+            "看见自己的成长，感受生活的美好。",
+            "自拍不仅是记录容貌，更是记录心情。"
+        ];
+
+        // 每日拍摄提示
+        const dailyTips = [
+            "尝试在自然光源下拍摄，光线从侧面照射可以更好地展现面部轮廓。保持放松的表情，拍出最自然的自己！",
+            "今天可以尝试不同的角度，比如稍微低头或侧脸，发现自己最美的一面。记得保持微笑，它是最好的装饰品！",
+            "拍摄时注意背景的整洁，可以尝试靠近窗户利用自然光，让皮肤看起来更加通透。保持自信，你本来就很美！",
+            "今天可以尝试一些创意自拍，比如利用镜子或阴影创造有趣的效果。不要害怕尝试新风格，自拍是表达自我的方式！",
+            "拍摄前深呼吸，放松肩膀，让表情更加自然。眼睛是心灵的窗户，试着让眼神充满活力和自信。",
+            "尝试不同的表情变化，从微笑到沉思，捕捉多样的自己。记住，真实的表情比完美的姿势更有感染力。",
+            "今天可以尝试在不同的时间段拍摄，观察光线变化对面部特征的影响。每一刻的你都是独特而珍贵的。"
+        ];
+
+        // DOM 元素
+        const app = document.getElementById('app');
+        const pages = {
+            camera: document.getElementById('cameraPage'),
+            timeline: document.getElementById('timelinePage'),
+            compare: document.getElementById('comparePage'),
+            insights: document.getElementById('insightsPage'),
+            profile: document.getElementById('profilePage')
+        };
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const currentDateEl = document.getElementById('currentDate');
+        const dailyMotivationEl = document.getElementById('dailyMotivation');
+        const dailyTipEl = document.getElementById('dailyTip');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const editOptions = document.getElementById('editOptions');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const galleryBtn = document.getElementById('galleryBtn');
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationModal = document.getElementById('notificationModal');
+        const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const photosGrid = document.getElementById('photosGrid');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const currentMonthEl = document.getElementById('currentMonth');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        const comparePhoto1 = document.getElementById('comparePhoto1');
+        const comparePhoto2 = document.getElementById('comparePhoto2');
+        const clearCompareBtn = document.getElementById('clearCompareBtn');
+        const compareTools = document.getElementById('compareTools');
+        const sideBySideBtn = document.getElementById('sideBySideBtn');
+        const overlayBtn = document.getElementById('overlayBtn');
+        const opacitySliderContainer = document.getElementById('opacitySliderContainer');
+        const opacitySlider = document.getElementById('opacitySlider');
+        const sideBySideView = document.getElementById('sideBySideView');
+        const overlayView = document.getElementById('overlayView');
+        const sideBySide1 = document.getElementById('sideBySide1');
+        const sideBySide2 = document.getElementById('sideBySide2');
+        const overlayBottom = document.getElementById('overlayBottom');
+        const overlayTop = document.getElementById('overlayTop');
+        const aiAnalysis = document.getElementById('aiAnalysis');
+        const generateAnalysisBtn = document.getElementById('generateAnalysisBtn');
+        const analysisResultModal = document.getElementById('analysisResultModal');
+        const closeAnalysisBtn = document.getElementById('closeAnalysisBtn');
+        const saveAnalysisBtn = document.getElementById('saveAnalysisBtn');
+        const photoSelectModal = document.getElementById('photoSelectModal');
+        const closePhotoSelectBtn = document.getElementById('closePhotoSelectBtn');
+        const selectablePhotos = document.getElementById('selectablePhotos');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const clearDataModal = document.getElementById('clearDataModal');
+        const cancelClearDataBtn = document.getElementById('cancelClearDataBtn');
+        const confirmClearDataBtn = document.getElementById('confirmClearDataBtn');
+        const streakCountEl = document.getElementById('streakCount');
+        const totalCountEl = document.getElementById('totalCount');
+        const progressCircle = document.getElementById('progressCircle');
+        const timeFilterBtns = document.querySelectorAll('.time-filter-btn');
+        const activityChart = document.getElementById('activityChart');
+        const changeTrendChart = document.getElementById('changeTrendChart');
+
+        // 应用状态
+        let currentPage = 'camera';
+        let currentStream = null;
+        let facingMode = 'user'; // 'user' 或 'environment'
+        let selectedPhotos = {
+            photo1: null,
+            photo2: null
+        };
+        let compareMode = 'sideBySide'; // 'sideBySide', 'topBottom', 'slider' 或 'overlay'
+        let currentMonth = new Date();
+        let hasCameraAccess = false;
+        let mockStreakCount = 7;
+        let mockTotalCount = 23;
+        let showReferenceLine = false;
+        let showComparisonFrame = false;
+        let beautyMode = false;
+        let flashMode = 'off'; // 'off', 'on', 'auto'
+        let isDraggingSlider = false;
+
+        // 初始化应用
+        function initApp() {
+            // 设置当前日期和每日激励语
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            currentDateEl.textContent = now.toLocaleDateString('zh-CN', options);
+            
+            // 随机选择一条激励语和提示
+            const dayOfWeek = now.getDay();
+            dailyMotivationEl.textContent = dailyMotivations[dayOfWeek];
+            dailyTipEl.textContent = dailyTips[dayOfWeek];
+            
+            // 初始化页面
+            showPage('camera');
+            
+            // 初始化相机
+            initCamera();
+            
+            // 初始化时间线
+            initTimeline();
+            
+            // 初始化图表
+            initCharts();
+            
+            // 设置事件监听器
+            setupEventListeners();
+            
+            // 初始化洞察页面图表
+            initInsightsChart();
+        }
+
+        // 初始化相机
+        function initCamera() {
+            // 模拟相机访问，实际应用中应该使用 navigator.mediaDevices.getUserMedia
+            setTimeout(() => {
+                hasCameraAccess = true;
+                // 使用示例图片作为相机预览
+                cameraPreview.style.display = 'none';
+                cameraPreview.src = 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D';
+                cameraPreview.style.objectFit = 'cover';
+                cameraPreview.style.width = '100%';
+                cameraPreview.style.height = '100%';
+                cameraPreview.style.display = 'block';
+            }, 1000);
+        }
+
+        // 初始化时间线
+        function initTimeline() {
+            // 更新当前月份显示
+            updateMonthDisplay();
+            
+            // 生成日历
+            generateCalendar();
+            
+            // 生成照片网格
+            generatePhotosGrid();
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 活动图表
+            if (activityChart) {
+                const ctx = activityChart.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+                        datasets: [{
+                            label: '打卡天数',
+                            data: [3, 5, 4, 6, 8, 10, 7],
+                            backgroundColor: '#3B82F6',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 15,
+                                ticks: {
+                                    stepSize: 5
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 变化趋势图 (在弹窗中)
+            if (changeTrendChart) {
+                const ctx = changeTrendChart.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+                        datasets: [{
+                            label: '变化指数',
+                            data: [20, 25, 30, 45, 55, 70, 85],
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航按钮点击事件
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = btn.dataset.page.replace('Page', '');
+                    showPage(page);
+                    
+                    // 更新导航按钮样式
+                    navButtons.forEach(b => {
+                        b.classList.remove('text-primary');
+                        b.classList.add('text-gray-500');
+                    });
+                    btn.classList.remove('text-gray-500');
+                    btn.classList.add('text-primary');
+                });
+            });
+            
+            // 拍照按钮点击事件
+            captureBtn.addEventListener('click', capturePhoto);
+            
+            // 重拍按钮点击事件
+            retakeBtn.addEventListener('click', retakePhoto);
+            
+            // 保存按钮点击事件
+            saveBtn.addEventListener('click', savePhoto);
+            
+            // 切换相机按钮点击事件
+            switchCameraBtn.addEventListener('click', switchCamera);
+            
+            // 相册按钮点击事件
+            galleryBtn.addEventListener('click', openGallery);
+            
+            // 通知按钮点击事件
+            notificationBtn.addEventListener('click', () => {
+                notificationModal.classList.remove('hidden');
+                notificationBadge.classList.add('hidden');
+            });
+            
+            // 关闭通知弹窗按钮点击事件
+            closeNotificationBtn.addEventListener('click', () => {
+                notificationModal.classList.add('hidden');
+            });
+            
+            // 设置按钮点击事件
+            settingsBtn.addEventListener('click', () => {
+                showPage('profile');
+                
+                // 更新导航按钮样式
+                navButtons.forEach(b => {
+                    b.classList.remove('text-primary');
+                    b.classList.add('text-gray-500');
+                });
+                navButtons[3].classList.remove('text-gray-500');
+                navButtons[3].classList.add('text-primary');
+            });
+            
+            // 月份导航按钮点击事件
+            prevMonthBtn.addEventListener('click', () => {
+                currentMonth.setMonth(currentMonth.getMonth() - 1);
+                updateMonthDisplay();
+                generateCalendar();
+            });
+            
+            nextMonthBtn.addEventListener('click', () => {
+                currentMonth.setMonth(currentMonth.getMonth() + 1);
+                updateMonthDisplay();
+                generateCalendar();
+            });
+            
+            // 对比照片选择事件
+            comparePhoto1.addEventListener('click', () => openPhotoSelectModal('photo1'));
+            comparePhoto2.addEventListener('click', () => openPhotoSelectModal('photo2'));
+            
+            // 清除对比按钮点击事件
+            clearCompareBtn.addEventListener('click', clearCompareSelection);
+            
+            // 对比模式切换按钮点击事件
+            sideBySideBtn.addEventListener('click', () => setCompareMode('sideBySide'));
+            topBottomBtn.addEventListener('click', () => setCompareMode('topBottom'));
+            sliderBtn.addEventListener('click', () => setCompareMode('slider'));
+            overlayBtn.addEventListener('click', () => setCompareMode('overlay'));
+            
+            // 滑动擦除交互
+            const sliderHandle = document.getElementById('sliderHandle');
+            const sliderTop = document.getElementById('sliderTop');
+            sliderHandle.addEventListener('mousedown', startSliderDrag);
+            sliderHandle.addEventListener('touchstart', startSliderDrag);
+            window.addEventListener('mousemove', dragSlider);
+            window.addEventListener('touchmove', dragSlider);
+            window.addEventListener('mouseup', stopSliderDrag);
+            window.addEventListener('touchend', stopSliderDrag);
+            
+            // 标记工具按钮点击事件
+            document.getElementById('addNoteBtn').addEventListener('click', addNoteToComparison);
+            document.getElementById('drawOnImageBtn').addEventListener('click', toggleDrawingMode);
+            document.getElementById('saveComparisonBtn').addEventListener('click', saveComparison);
+            
+            // 拍摄辅助按钮点击事件
+            document.getElementById('referenceBtn').addEventListener('click', toggleReferenceLine);
+            document.getElementById('referenceLineBtn').addEventListener('click', toggleReferenceLine);
+            document.getElementById('compareFrameBtn').addEventListener('click', toggleComparisonFrame);
+            document.getElementById('importFromGalleryBtn').addEventListener('click', importFromGallery);
+            document.getElementById('beautyBtn').addEventListener('click', toggleBeautyMode);
+            document.getElementById('flashBtn').addEventListener('click', toggleFlashMode);
+            
+            // 洞察页面按钮点击事件
+            document.getElementById('generateVideoBtn').addEventListener('click', generateChangeVideo);
+            const timeRangeBtns = document.querySelectorAll('.time-range-btn');
+            timeRangeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timeRangeBtns.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-gray-100', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                    // 这里可以添加实际的时间范围筛选逻辑
+                });
+            });
+            
+            // 透明度滑块事件
+            opacitySlider.addEventListener('input', updateOpacity);
+            
+            // 生成分析报告按钮点击事件
+            generateAnalysisBtn.addEventListener('click', showAnalysisResult);
+            
+            // 关闭分析结果弹窗按钮点击事件
+            closeAnalysisBtn.addEventListener('click', () => {
+                analysisResultModal.classList.add('hidden');
+            });
+            
+            // 保存分析报告按钮点击事件
+            saveAnalysisBtn.addEventListener('click', () => {
+                alert('分析报告已保存到相册！');
+                analysisResultModal.classList.add('hidden');
+            });
+            
+            // 关闭照片选择弹窗按钮点击事件
+            closePhotoSelectBtn.addEventListener('click', () => {
+                photoSelectModal.classList.add('hidden');
+            });
+            
+            // 清除数据按钮点击事件
+            clearDataBtn.addEventListener('click', () => {
+                clearDataModal.classList.remove('hidden');
+            });
+            
+            // 取消清除数据按钮点击事件
+            cancelClearDataBtn.addEventListener('click', () => {
+                clearDataModal.classList.add('hidden');
+            });
+            
+            // 确认清除数据按钮点击事件
+            confirmClearDataBtn.addEventListener('click', () => {
+                alert('所有数据已清除！');
+                clearDataModal.classList.add('hidden');
+            });
+            
+            // 时间筛选按钮点击事件
+            timeFilterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    timeFilterBtns.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                    
+                    // 这里可以添加实际的筛选逻辑
+                    generatePhotosGrid();
+                });
+            });
+            
+            // 点击弹窗外部关闭弹窗
+            window.addEventListener('click', (e) => {
+                if (e.target === notificationModal) {
+                    notificationModal.classList.add('hidden');
+                }
+                if (e.target === photoSelectModal) {
+                    photoSelectModal.classList.add('hidden');
+                }
+                if (e.target === clearDataModal) {
+                    clearDataModal.classList.add('hidden');
+                }
+                if (e.target === analysisResultModal) {
+                    analysisResultModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // 显示页面
+        function showPage(pageName) {
+            // 隐藏所有页面
+            Object.values(pages).forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // 显示选中的页面
+            pages[pageName].classList.remove('hidden');
+            
+            // 更新当前页面
+            currentPage = pageName;
+            
+            // 如果是时间线页面，重新生成日历和照片网格
+            if (pageName === 'timeline') {
+                generateCalendar();
+                generatePhotosGrid();
+            }
+            
+            // 如果是对比页面，更新对比视图
+            if (pageName === 'compare') {
+                updateCompareView();
+            }
+        }
+
+        // 拍照
+        function capturePhoto() {
+            // 添加快门动画
+            captureBtn.classList.add('camera-shutter');
+            setTimeout(() => {
+                captureBtn.classList.remove('camera-shutter');
+            }, 500);
+            
+            // 模拟拍照过程
+            if (hasCameraAccess) {
+                // 在实际应用中，这里应该使用 canvas 捕获视频帧
+                // 这里我们使用示例图片模拟
+                capturedImage.src = 'https://p5-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cc537a4de2b5418da806bf8ed7d5a751~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602252216343026707195F244795DF3&rrcfp=f06b921b&x-expires=1774621050&x-signature=cYFBNGvqdh1Vdr2qJylYnPa8I2I%3D';
+                cameraPreview.style.display = 'none';
+                capturedImage.style.display = 'block';
+                editOptions.classList.remove('hidden');
+            } else {
+                alert('无法访问相机，请检查权限设置。');
+            }
+        }
+
+        // 重拍
+        function retakePhoto() {
+            capturedImage.style.display = 'none';
+            cameraPreview.style.display = 'block';
+            editOptions.classList.add('hidden');
+        }
+
+        // 保存照片
+        function savePhoto() {
+            // 模拟保存过程
+            alert('照片已保存！');
+            
+            // 更新打卡进度
+            mockStreakCount++;
+            mockTotalCount++;
+            streakCountEl.textContent = `${mockStreakCount}天`;
+            totalCountEl.textContent = `${mockTotalCount}天`;
+            
+            // 更新进度环
+            const circumference = 2 * Math.PI * 16;
+            const progress = mockStreakCount % 30 / 30;
+            const offset = circumference - progress * circumference;
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // 重置相机界面
+            retakePhoto();
+            
+            // 显示通知
+            notificationBadge.classList.remove('hidden');
+        }
+
+        // 切换相机
+        function switchCamera() {
+            // 模拟切换前后摄像头
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+            alert(`已切换到${facingMode === 'user' ? '前置' : '后置'}摄像头`);
+        }
+
+        // 打开相册
+        function openGallery() {
+            alert('相册功能正在开发中，敬请期待！');
+        }
+
+        // 更新月份显示
+        function updateMonthDisplay() {
+            currentMonthEl.textContent = currentMonth.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+        }
+
+        // 生成日历
+        function generateCalendar() {
+            // 清空日历网格
+            calendarGrid.innerHTML = '';
+            
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            // 获取当月第一天是星期几
+            const firstDay = new Date(year, month, 1).getDay();
+            
+            // 获取当月的天数
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // 添加空白单元格
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'h-10 flex items-center justify-center text-gray-300';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // 添加日期单元格
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'h-10 flex items-center justify-center rounded-full cursor-pointer';
+                
+                // 检查是否有照片
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasPhoto = mockPhotos.some(photo => photo.date === dateStr);
+                
+                if (hasPhoto) {
+                    dayCell.classList.add('bg-primary', 'text-white');
+                } else {
+                    dayCell.classList.add('hover:bg-gray-100');
+                }
+                
+                dayCell.textContent = day;
+                dayCell.addEventListener('click', () => {
+                    if (hasPhoto) {
+                        const photo = mockPhotos.find(p => p.date === dateStr);
+                        showPhotoDetail(photo);
+                    }
+                });
+                
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        // 生成照片网格
+        function generatePhotosGrid() {
+            // 清空照片网格
+            photosGrid.innerHTML = '';
+            
+            // 添加照片
+            mockPhotos.forEach(photo => {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'aspect-square rounded-lg overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow';
+                
+                const img = document.createElement('img');
+                img.src = photo.src;
+                img.alt = `自拍 ${photo.date}`;
+                img.className = 'w-full h-full object-cover';
+                
+                // 根据照片在网格中的位置裁剪
+                if (photo.position === 'top-left') {
+                    img.style.objectPosition = 'top left';
+                } else if (photo.position === 'top-right') {
+                    img.style.objectPosition = 'top right';
+                } else if (photo.position === 'bottom-left') {
+                    img.style.objectPosition = 'bottom left';
+                } else if (photo.position === 'bottom-right') {
+                    img.style.objectPosition = 'bottom right';
+                }
+                
+                photoItem.appendChild(img);
+                
+                // 添加日期标签
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center';
+                dateLabel.textContent = formatDate(photo.date);
+                photoItem.appendChild(dateLabel);
+                
+                // 点击事件
+                photoItem.addEventListener('click', () => showPhotoDetail(photo));
+                
+                photosGrid.appendChild(photoItem);
+            });
+        }
+
+        // 显示照片详情
+        function showPhotoDetail(photo) {
+            alert(`查看照片详情：${photo.date}`);
+        }
+
+        // 打开照片选择弹窗
+        function openPhotoSelectModal(photoType) {
+            // 清空可选照片
+            selectablePhotos.innerHTML = '';
+            
+            // 添加照片
+            mockPhotos.forEach(photo => {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'aspect-square rounded-lg overflow-hidden shadow-sm cursor-pointer hover:ring-2 hover:ring-primary transition-all';
+                
+                const img = document.createElement('img');
+                img.src = photo.src;
+                img.alt = `自拍 ${photo.date}`;
+                img.className = 'w-full h-full object-cover';
+                
+                // 根据照片在网格中的位置裁剪
+                if (photo.position === 'top-left') {
+                    img.style.objectPosition = 'top left';
+                } else if (photo.position === 'top-right') {
+                    img.style.objectPosition = 'top right';
+                } else if (photo.position === 'bottom-left') {
+                    img.style.objectPosition = 'bottom left';
+                } else if (photo.position === 'bottom-right') {
+                    img.style.objectPosition = 'bottom right';
+                }
+                
+                photoItem.appendChild(img);
+                
+                // 点击事件
+                photoItem.addEventListener('click', () => {
+                    selectedPhotos[photoType] = photo;
+                    updateCompareSelection();
+                    photoSelectModal.classList.add('hidden');
+                });
+                
+                selectablePhotos.appendChild(photoItem);
+            });
+            
+            // 显示弹窗
+            photoSelectModal.classList.remove('hidden');
+        }
+
+        // 更新对比选择
+        function updateCompareSelection() {
+            // 更新选择区域显示
+            if (selectedPhotos.photo1) {
+                comparePhoto1.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = selectedPhotos.photo1.src;
+                img.alt = `自拍 ${selectedPhotos.photo1.date}`;
+                img.className = 'w-full h-full object-cover rounded-lg';
+                comparePhoto1.appendChild(img);
+                
+                // 添加日期标签
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded';
+                dateLabel.textContent = formatDate(selectedPhotos.photo1.date);
+                comparePhoto1.appendChild(dateLabel);
+            } else {
+                comparePhoto1.innerHTML = `
+                    <i class="fa fa-plus text-gray-400 text-3xl mb-2"></i>
+                    <p class="text-gray-500 text-sm">选择第一张照片</p>
+                `;
+            }
+            
+            if (selectedPhotos.photo2) {
+                comparePhoto2.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = selectedPhotos.photo2.src;
+                img.alt = `自拍 ${selectedPhotos.photo2.date}`;
+                img.className = 'w-full h-full object-cover rounded-lg';
+                comparePhoto2.appendChild(img);
+                
+                // 添加日期标签
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded';
+                dateLabel.textContent = formatDate(selectedPhotos.photo2.date);
+                comparePhoto2.appendChild(dateLabel);
+            } else {
+                comparePhoto2.innerHTML = `
+                    <i class="fa fa-plus text-gray-400 text-3xl mb-2"></i>
+                    <p class="text-gray-500 text-sm">选择第二张照片</p>
+                `;
+            }
+            
+            // 如果两张照片都已选择，显示对比工具
+            if (selectedPhotos.photo1 && selectedPhotos.photo2) {
+                compareTools.classList.remove('hidden');
+                aiAnalysis.classList.remove('hidden');
+                updateCompareView();
+            } else {
+                compareTools.classList.add('hidden');
+                aiAnalysis.classList.add('hidden');
+            }
+        }
+
+        // 清空对比选择
+        function clearCompareSelection() {
+            selectedPhotos = {
+                photo1: null,
+                photo2: null
+            };
+            updateCompareSelection();
+        }
+
+        // 设置对比模式
+        function setCompareMode(mode) {
+            compareMode = mode;
+            
+            // 更新按钮样式
+            const modeButtons = {
+                sideBySide: sideBySideBtn,
+                topBottom: topBottomBtn,
+                slider: sliderBtn,
+                overlay: overlayBtn
+            };
+            
+            // 重置所有按钮样式
+            Object.values(modeButtons).forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            });
+            
+            // 设置选中按钮样式
+            modeButtons[mode].classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            modeButtons[mode].classList.add('bg-primary', 'text-white');
+            
+            // 显示/隐藏透明度滑块
+            if (mode === 'overlay') {
+                opacitySliderContainer.classList.remove('hidden');
+            } else {
+                opacitySliderContainer.classList.add('hidden');
+            }
+            
+            // 显示/隐藏相应的视图
+            const views = {
+                sideBySide: sideBySideView,
+                topBottom: topBottomView,
+                slider: sliderView,
+                overlay: overlayView
+            };
+            
+            Object.values(views).forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            views[mode].classList.remove('hidden');
+            
+            updateCompareView();
+        }
+
+        // 更新对比视图
+        function updateCompareView() {
+            if (!selectedPhotos.photo1 || !selectedPhotos.photo2) return;
+            
+            switch (compareMode) {
+                case 'sideBySide':
+                    sideBySide1.style.backgroundImage = `url(${selectedPhotos.photo1.src})`;
+                    sideBySide1.style.backgroundSize = 'cover';
+                    sideBySide1.style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo1.position);
+                    
+                    sideBySide2.style.backgroundImage = `url(${selectedPhotos.photo2.src})`;
+                    sideBySide2.style.backgroundSize = 'cover';
+                    sideBySide2.style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo2.position);
+                    break;
+                    
+                case 'topBottom':
+                    document.getElementById('topBottom1').style.backgroundImage = `url(${selectedPhotos.photo1.src})`;
+                    document.getElementById('topBottom1').style.backgroundSize = 'cover';
+                    document.getElementById('topBottom1').style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo1.position);
+                    
+                    document.getElementById('topBottom2').style.backgroundImage = `url(${selectedPhotos.photo2.src})`;
+                    document.getElementById('topBottom2').style.backgroundSize = 'cover';
+                    document.getElementById('topBottom2').style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo2.position);
+                    break;
+                    
+                case 'slider':
+                    document.getElementById('sliderBottom').style.backgroundImage = `url(${selectedPhotos.photo1.src})`;
+                    document.getElementById('sliderBottom').style.backgroundSize = 'cover';
+                    document.getElementById('sliderBottom').style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo1.position);
+                    
+                    document.getElementById('sliderTopImage').style.backgroundImage = `url(${selectedPhotos.photo2.src})`;
+                    document.getElementById('sliderTopImage').style.backgroundSize = 'cover';
+                    document.getElementById('sliderTopImage').style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo2.position);
+                    
+                    // 重置滑块位置
+                    document.getElementById('sliderHandle').style.left = '50%';
+                    document.getElementById('sliderTop').style.clipPath = 'inset(0 0 0 50%)';
+                    break;
+                    
+                case 'overlay':
+                    overlayBottom.style.backgroundImage = `url(${selectedPhotos.photo1.src})`;
+                    overlayBottom.style.backgroundSize = 'cover';
+                    overlayBottom.style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo1.position);
+                    
+                    overlayTop.style.backgroundImage = `url(${selectedPhotos.photo2.src})`;
+                    overlayTop.style.backgroundSize = 'cover';
+                    overlayTop.style.backgroundPosition = getBackgroundPosition(selectedPhotos.photo2.position);
+                    
+                    // 更新透明度
+                    updateOpacity();
+                    break;
+            }
+        }
+
+        // 更新透明度
+        function updateOpacity() {
+            const opacity = opacitySlider.value / 100;
+            overlayTop.style.opacity = opacity;
+            opacitySliderContainer.querySelector('.text-xs.text-gray-500.mt-1 span:nth-child(2)').textContent = `${opacitySlider.value}%`;
+        }
+
+        // 显示分析结果
+        function showAnalysisResult() {
+            analysisResultModal.classList.remove('hidden');
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+        }
+
+        // 获取背景位置
+        function getBackgroundPosition(position) {
+            switch (position) {
+                case 'top-left': return 'top left';
+                case 'top-right': return 'top right';
+                case 'bottom-left': return 'bottom left';
+                case 'bottom-right': return 'bottom right';
+                default: return 'center';
+            }
+        }
+
+        // 滑动擦除相关函数
+        function startSliderDrag(e) {
+            e.preventDefault();
+            isDraggingSlider = true;
+            document.body.style.cursor = 'ew-resize';
+        }
+
+        function dragSlider(e) {
+            if (!isDraggingSlider || compareMode !== 'slider') return;
+            
+            const sliderContainer = document.getElementById('compareResult');
+            const rect = sliderContainer.getBoundingClientRect();
+            let clientX;
+            
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+            } else {
+                clientX = e.clientX;
+            }
+            
+            const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            const percentage = x * 100;
+            
+            document.getElementById('sliderHandle').style.left = `${percentage}%`;
+            document.getElementById('sliderTop').style.clipPath = `inset(0 0 0 ${percentage}%)`;
+        }
+
+        function stopSliderDrag() {
+            isDraggingSlider = false;
+            document.body.style.cursor = '';
+        }
+
+        // 拍摄辅助功能
+        function toggleReferenceLine() {
+            const referenceOverlay = document.getElementById('referenceOverlay');
+            showReferenceLine = !showReferenceLine;
+            
+            if (showReferenceLine) {
+                referenceOverlay.classList.remove('hidden');
+                document.getElementById('referenceLineBtn').classList.add('bg-primary', 'text-white');
+                document.getElementById('referenceLineBtn').classList.remove('bg-gray-100', 'text-gray-700');
+            } else {
+                referenceOverlay.classList.add('hidden');
+                document.getElementById('referenceLineBtn').classList.remove('bg-primary', 'text-white');
+                document.getElementById('referenceLineBtn').classList.add('bg-gray-100', 'text-gray-700');
+            }
+        }
+
+        function toggleComparisonFrame() {
+            showComparisonFrame = !showComparisonFrame;
+            // 这里可以添加同比例框的实现逻辑
+            alert(showComparisonFrame ? '已开启同比例框' : '已关闭同比例框');
+        }
+
+        function importFromGallery() {
+            alert('请选择要导入的照片');
+            // 模拟导入成功
+            setTimeout(() => {
+                alert('照片导入成功！');
+            }, 1000);
+        }
+
+        function toggleBeautyMode() {
+            beautyMode = !beautyMode;
+            const beautyBtn = document.getElementById('beautyBtn');
+            
+            if (beautyMode) {
+                beautyBtn.classList.add('bg-primary');
+                alert('已开启美颜模式');
+            } else {
+                beautyBtn.classList.remove('bg-primary');
+                alert('已关闭美颜模式');
+            }
+        }
+
+        function toggleFlashMode() {
+            const flashModes = ['off', 'on', 'auto'];
+            const currentIndex = flashModes.indexOf(flashMode);
+            const nextIndex = (currentIndex + 1) % flashModes.length;
+            flashMode = flashModes[nextIndex];
+            
+            const flashBtn = document.getElementById('flashBtn');
+            flashBtn.className = 'p-2 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors';
+            
+            switch (flashMode) {
+                case 'on':
+                    flashBtn.classList.add('bg-yellow-500');
+                    break;
+                case 'auto':
+                    flashBtn.classList.add('bg-blue-500');
+                    break;
+            }
+            
+            alert(`闪光灯模式已设置为: ${flashMode === 'off' ? '关闭' : flashMode === 'on' ? '开启' : '自动'}`);
+        }
+
+        // 对比工具功能
+        function addNoteToComparison() {
+            alert('请点击图片添加备注');
+            // 这里可以添加实际的备注功能实现
+        }
+
+        function toggleDrawingMode() {
+            alert('已进入标记模式，请在图片上绘制');
+            // 这里可以添加实际的绘图功能实现
+        }
+
+        function saveComparison() {
+            alert('对比结果已保存到相册！');
+        }
+
+        // 洞察页面功能
+        function generateChangeVideo() {
+            alert('正在生成变化视频，请稍候...');
+            // 模拟生成过程
+            setTimeout(() => {
+                alert('变化视频生成成功！');
+            }, 2000);
+        }
+
+        // 初始化洞察页面图表
+        function initInsightsChart() {
+            const insightsChart = document.getElementById('insightsChart');
+            if (!insightsChart) return;
+            
+            const ctx = insightsChart.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['6/1', '6/5', '6/10', '6/15', '6/20', '6/25', '6/30', '7/5', '7/10', '7/15', '7/20'],
+                    datasets: [
+                        {
+                            label: '皮肤亮度',
+                            data: [65, 68, 70, 72, 75, 78, 80, 82, 85, 87, 90],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '面部轮廓',
+                            data: [70, 72, 73, 75, 76, 78, 80, 82, 83, 85, 88],
+                            borderColor: '#EC4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100,
+                            ticks: {
+                                stepSize: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
