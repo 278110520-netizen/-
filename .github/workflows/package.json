@@ -1,0 +1,81 @@
+{
+  "name": "daily-selfie",
+  "displayName": "每日自拍",
+  "version": "1.0.0",
+  "description": "一款记录每日容貌变化的自拍打卡应用",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cordova build",
+    "build:android": "cordova build android --release",
+    "build:ios": "cordova build ios --release",
+    "run": "cordova run",
+    "run:android": "cordova run android --device",
+    "run:ios": "cordova run ios --device",
+    "prepare": "cordova prepare",
+    "clean": "cordova clean",
+    "check": "cordova requirements",
+    "info": "cordova info"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios",
+    "selfie",
+    "photo",
+    "tracking",
+    "comparison"
+  ],
+  "author": "Selfie Tracker Team",
+  "license": "MIT",
+  "devDependencies": {
+    "cordova": "^12.0.0",
+    "cordova-android": "^12.0.0",
+    "cordova-ios": "^7.0.0",
+    "cordova-plugin-android-permissions": "^1.1.5",
+    "cordova-plugin-app-version": "^0.1.16",
+    "cordova-plugin-biometric-auth": "^3.0.1",
+    "cordova-plugin-camera": "^7.0.0",
+    "cordova-plugin-device": "^2.1.0",
+    "cordova-plugin-file": "^7.0.0",
+    "cordova-plugin-file-opener2": "^4.0.0",
+    "cordova-plugin-ios-camera-permissions": "^1.2.0",
+    "cordova-plugin-local-notification": "^0.9.0-beta.3",
+    "cordova-plugin-media-capture": "^4.0.0",
+    "cordova-plugin-secure-storage": "^3.0.2",
+    "cordova-plugin-splashscreen": "^6.0.2",
+    "cordova-plugin-statusbar": "^3.0.0",
+    "cordova-plugin-whitelist": "^1.3.5"
+  },
+  "cordova": {
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "plugins": {
+      "cordova-plugin-camera": {
+        "CAMERA_USAGE_DESCRIPTION": "此应用需要访问您的相机来拍摄每日自拍",
+        "PHOTOLIBRARY_USAGE_DESCRIPTION": "此应用需要访问您的照片库来导入和保存自拍照片",
+        "PHOTOLIBRARY_ADD_USAGE_DESCRIPTION": "此应用需要保存照片到您的照片库"
+      },
+      "cordova-plugin-file": {
+        "PHOTOLIBRARY_USAGE_DESCRIPTION": "此应用需要访问您的文件系统来存储自拍照片"
+      },
+      "cordova-plugin-media-capture": {
+        "CAMERA_USAGE_DESCRIPTION": "此应用需要访问您的相机来录制视频",
+        "MICROPHONE_USAGE_DESCRIPTION": "此应用需要访问麦克风来录制视频",
+        "PHOTOLIBRARY_USAGE_DESCRIPTION": "此应用需要访问您的照片库来保存录制的视频"
+      },
+      "cordova-plugin-local-notification": {
+        "ANDROID_SUPPORT_V4_VERSION": "28.0.0"
+      },
+      "cordova-plugin-ios-camera-permissions": {
+        "CAMERA_USAGE_DESCRIPTION": "此应用需要访问您的相机来拍摄每日自拍"
+      },
+      "cordova-plugin-biometric-auth": {
+        "FACEID_USAGE_DESCRIPTION": "此应用需要使用Face ID来解锁应用"
+      }
+    }
+  },
+  "dependencies": {}
+}
